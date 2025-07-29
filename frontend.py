@@ -1,6 +1,6 @@
 import streamlit as st
 from backend import (
-    extract_text_from_pdfs,
+    extract_text_from_files,
     chunk_text,
     ask_question_over_chunks,
     ask_general_question
@@ -16,25 +16,25 @@ def main():
         <hr style='margin-top: 0;'>
     """, unsafe_allow_html=True)
 
-    # Upload PDFs but optional
+    # Upload multiple file types
     uploaded_files = st.file_uploader(
-        "Upload your PDF files (optional)",
-        type=["pdf"],
+        "Upload your documents (PDF, DOCX, XLSX, CSV, TXT, JSON)",
+        type=["pdf", "docx", "xlsx", "xls", "csv", "txt", "json"],
         accept_multiple_files=True
     )
 
     if uploaded_files:
-        with st.spinner("Processing PDFs..."):
+        with st.spinner("Processing documents..."):
             temp_dir = tempfile.mkdtemp()
-            pdf_paths = []
+            file_paths = []
             for file in uploaded_files:
                 temp_path = os.path.join(temp_dir, file.name)
                 with open(temp_path, "wb") as f:
                     f.write(file.getbuffer())
-                pdf_paths.append(temp_path)
-            full_text = extract_text_from_pdfs(pdf_paths)
-            st.session_state["pdf_text_chunks"] = chunk_text(full_text)
-            st.success(f"Loaded {len(uploaded_files)} PDFs.")
+                file_paths.append(temp_path)
+            full_text = extract_text_from_files(file_paths)
+            st.session_state["document_text_chunks"] = chunk_text(full_text)
+            st.success(f"Loaded {len(uploaded_files)} documents.")
 
     # Initialize session state
     if "user_input" not in st.session_state:
@@ -70,10 +70,10 @@ def main():
     if st.session_state.last_question:
         with st.spinner("Getting answer..."):
             try:
-                if "pdf_text_chunks" in st.session_state:
-                    # Pass the whole chat history and PDF chunks
+                if "document_text_chunks" in st.session_state:
+                    # Pass the whole chat history and document chunks
                     answer = ask_question_over_chunks(
-                        st.session_state["pdf_text_chunks"],
+                        st.session_state["document_text_chunks"],
                         st.session_state.chat_history
                     )
                 else:
