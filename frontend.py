@@ -1,6 +1,6 @@
 import streamlit as st
 from backend import (
-    extract_text_from_files,
+    extract_text_from_files_robust,
     chunk_text,
     ask_question_over_chunks,
     ask_general_question
@@ -32,7 +32,7 @@ def main():
                 with open(temp_path, "wb") as f:
                     f.write(file.getbuffer())
                 file_paths.append(temp_path)
-            full_text = extract_text_from_files(file_paths)
+            full_text = extract_text_from_files_robust(file_paths)
             st.session_state["document_text_chunks"] = chunk_text(full_text)
             st.success(f"Loaded {len(uploaded_files)} documents.")
 
