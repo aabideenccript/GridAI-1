@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ GridAI - Smart Electrical Grid Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: 100vh;
+            background: #0a0a0a;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 20px;
+            border-right: 1px solid #333;
+            overflow-y: auto;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        .logo h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo p {
+            color: #888;
+            font-size: 0.8em;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #444;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .upload-area i {
+            font-size: 2em;
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 15px;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            font-size: 0.8em;
+        }
+
+        .progress-container {
+            display: none;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #ccc;
+            font-size: 0.8em;
+        }
+
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #111;
+        }
+
+        .chat-header {
+            background: linear-gradient(90deg, #1a1a1a, #2d2d2d);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #111;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #222;
+            color: #fff;
+            border: 1px solid #333;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-size: 1em;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            order: 2;
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(45deg, #333, #555);
+            color: white;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 1px solid #444;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            background: #222;
+            color: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .message-input:focus {
+            border-color: #ff6b35;
+        }
+
+        .send-btn {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s ease;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .images-panel {
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-left: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .images-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .images-header h3 {
+            color: #ff6b35;
+            margin-bottom: 5px;
+        }
+
+        .images-count {
+            color: #888;
+            font-size: 0.8em;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .image-item:hover {
+            transform: scale(1.05);
+            border-color: #ff6b35;
+        }
+
+        .image-item.selected {
+            border-color: #f7931e;
+            transform: scale(1.1);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 5px;
+            font-size: 0.7em;
+            text-align: center;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #ff6b35;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 0.8em;
+        }
+
+        .status-success {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+
+        .status-error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>⚡ GridAI</h1>
+                <p>Electrical Grid Assistant</p>
+            </div>
+            
+            <div class="upload-section">
+                <h3 style="margin-bottom: 15px; color: #ff6b35;">📁 Upload Documents</h3>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload files</p>
+                    <small style="color: #888;">PDF, DOCX, XLSX, CSV, TXT, JSON</small>
+                    <input type="file" id="fileInput" class="file-input" multiple 
+                           accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.json">
+                </div>
+                <div id="fileList" class="file-list"></div>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+            
+            <div id="statusArea"></div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <h2>Chat with Eric - Your Grid Engineering Expert</h2>
+                <p>Ask questions about electrical systems, standards, and best practices</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message assistant">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <strong>Eric:</strong> Hello! I'm Eric, your electrical grid engineering assistant. Upload your technical documents OR ask me questions about substation design, power systems, safety standards, or any electrical engineering topic. I can analyze diagrams, specifications, and provide expert guidance based on IEEE, NESC, and NERC standards.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <i class="fas fa-spinner"></i> Processing your request...
+            </div>
+            
+            <div class="chat-input">
+                <div class="input-group">
+                    <input type="text" id="messageInput" class="message-input" 
+                           placeholder="Ask about electrical systems, standards, or upload documents first..."
+                           onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+
+    </div>
+    
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        let currentSessionId = null;
+        let selectedFiles = [];
+        let contextImages = [];
+        let allExtractedImages = [];
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFiles = Array.from(e.target.files);
+            displayFileList();
+            
+            if (selectedFiles.length > 0) {
+                currentSessionId = null;
+                uploadFiles();
+            }
+        });
+
+        function displayFileList() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            selectedFiles.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <i class="fas fa-file"></i> ${file.name}
+                    <small>(${(file.size / 1024).toFixed(1)} KB)</small>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        async function uploadFiles() {
+            if (selectedFiles.length === 0) return;
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            showProgressBar(true);
+            updateProgress(10, 'Uploading files...');
+
+            try {
+                const response = await fetch('/upload-progress', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let result = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.progress) {
+                                    updateProgress(data.progress, data.message);
+                                }
+                                if (data.result) {
+                                    result = data.result;
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                }
+
+                const finalResult = JSON.parse(result);
+                
+                if (finalResult.status === 'success') {
+                    currentSessionId = finalResult.session_id;
+                    updateProgress(100, 'Processing complete!');
+                    
+                    document.getElementById('messageInput').placeholder = 'Ask questions about your documents or click images to add to context...';
+                    
+                    console.log('Final result:', finalResult);
+                    if (finalResult.extracted_images && finalResult.extracted_images.length > 0) {
+                        console.log('Found', finalResult.extracted_images.length, 'extracted images');
+                        allExtractedImages = finalResult.extracted_images;
+                    } else {
+                        console.log('No extracted images found in result');
+                    }
+                    
+                    document.getElementById('fileInput').value = '';
+                    selectedFiles = [];
+                    
+                    addMessage(finalResult.message, 'assistant');
+                    
+                    setTimeout(() => showProgressBar(false), 2000);
+                } else {
+                    throw new Error(finalResult.detail || 'Processing failed');
+                }
+                
+            } catch (error) {
+                updateProgress(0, 'Error: ' + error.message);
+                setTimeout(() => showProgressBar(false), 3000);
+            }
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+
+            addMessage(message, 'user');
+            messageInput.value = '';
+
+            showLoading(true);
+
+            try {
+                const requestBody = {
+                    message: message,
+                    session_id: currentSessionId || 'general'
+                };
+                
+                if (contextImages.length > 0) {
+                    requestBody.image = contextImages[0];
+                }
+                
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addMessage(result.response, 'assistant', result.images || []);
+                    if (!currentSessionId) {
+                        currentSessionId = result.session_id;
+                    }
+                } else {
+                    addMessage('Sorry, I encountered an error: ' + result.detail, 'assistant');
+                }
+            } catch (error) {
+                addMessage('Sorry, I encountered an error: ' + error.message, 'assistant');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function addMessage(content, role, images = []) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = role === 'user' ? 
+                '<i class="fas fa-user"></i>' : 
+                '<i class="fas fa-robot"></i>';
+            
+            const name = role === 'user' ? 'You' : 'Eric';
+            
+            const formattedContent = formatMessage(content);
+            
+            let imagesHtml = '';
+            if (images && images.length > 0) {
+                imagesHtml = '<div style="margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">';
+                images.forEach((image, index) => {
+                    imagesHtml += `
+                        <div style="border: 1px solid #444; border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="openImageModal('data:image/jpeg;base64,${image}')">
+                            <img src="data:image/jpeg;base64,${image}" style="width: 100%; height: 150px; object-fit: cover;" alt="Image ${index + 1}">
+                            <div style="padding: 5px; background: #333; text-align: center; font-size: 0.8em;">Image ${index + 1}</div>
+                        </div>
+                    `;
+                });
+                imagesHtml += '</div>';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <strong>${name}:</strong> ${formattedContent}
+                    ${imagesHtml}
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function formatMessage(content) {
+            return content
+                .replace(/### (.*?)\n/g, '<h4 style="color: #ff6b35; margin: 15px 0 10px 0; font-size: 1.1em;">$1</h4>')
+                .replace(/## (.*?)\n/g, '<h3 style="color: #ff6b35; margin: 20px 0 15px 0; font-size: 1.2em;">$1</h3>')
+                .replace(/# (.*?)\n/g, '<h2 style="color: #ff6b35; margin: 25px 0 20px 0; font-size: 1.3em;">$1</h2>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #f7931e;">$1</strong>')
+                .replace(/^- (.*?)$/gm, '<div style="margin: 5px 0; padding-left: 20px;">• $1</div>')
+                .replace(/^\d+\. (.*?)$/gm, '<div style="margin: 5px 0; padding-left: 20px;">$&</div>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>')
+                .replace(/IEEE (\d+[A-Z]*)/g, '<span style="background: #333; padding: 2px 6px; border-radius: 3px; font-family: monospace;">IEEE $1</span>')
+                .replace(/NERC|NESC/g, '<span style="background: #333; padding: 2px 6px; border-radius: 3px; font-family: monospace;">$&</span>');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showStatus(message, type) {
+            const statusArea = document.getElementById('statusArea');
+            statusArea.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                statusArea.innerHTML = '';
+            }, 5000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function openImageModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = src;
+        }
+        
+        function displayExtractedImages(images) {
+            console.log('displayExtractedImages called with', images.length, 'images');
+            const grid = document.getElementById('imagesGrid');
+            const count = document.getElementById('imagesCount');
+            
+            grid.innerHTML = '';
+            count.textContent = `${images.length} images extracted`;
+            
+            images.forEach((imageBase64, index) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item';
+                imageItem.onclick = () => addImageToContext(imageBase64, index);
+                
+                imageItem.innerHTML = `
+                    <img src="data:image/jpeg;base64,${imageBase64}" alt="Image ${index + 1}">
+                    <div class="image-overlay">Image ${index + 1}</div>
+                `;
+                
+                grid.appendChild(imageItem);
+                console.log('Added image', index + 1, 'to grid');
+            });
+            
+            console.log('Images grid updated with', images.length, 'images');
+        }
+        
+        function showProgressBar(show) {
+            document.getElementById('progressContainer').style.display = show ? 'block' : 'none';
+        }
+        
+        function updateProgress(percent, message) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = message;
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        function addImageToContext(imageBase64, index) {
+            contextImages = [imageBase64];
+            
+            const messageInput = document.getElementById('messageInput');
+            messageInput.placeholder = `Image ${index + 1} added to context - Ask about this image...`;
+            
+            // Visual feedback
+            const imageItems = document.querySelectorAll('.image-item');
+            imageItems.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            showStatus(`Image ${index + 1} added to context`, 'success');
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
