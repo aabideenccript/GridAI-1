@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚡ GridAI - Smart Electrical Grid Assistant</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -14,7 +15,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             color: #ffffff;
             height: 100vh;
             overflow: hidden;
@@ -22,15 +23,15 @@
 
         .container {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 300px 1fr 250px;
             height: 100vh;
-            background: #0a0a0a;
         }
 
         .sidebar {
-            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.9) 0%, rgba(45, 45, 45, 0.9) 100%);
+            backdrop-filter: blur(10px);
             padding: 20px;
-            border-right: 1px solid #333;
+            border-right: 1px solid rgba(255, 107, 53, 0.3);
             overflow-y: auto;
         }
 
@@ -47,15 +48,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        .logo p {
-            color: #888;
-            font-size: 0.8em;
-        }
-
-        .upload-section {
-            margin-bottom: 30px;
         }
 
         .upload-area {
@@ -79,22 +71,6 @@
             margin-bottom: 10px;
         }
 
-        .file-input {
-            display: none;
-        }
-
-        .file-list {
-            margin-top: 15px;
-        }
-
-        .file-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 5px;
-            font-size: 0.8em;
-        }
-
         .progress-container {
             display: none;
             margin: 20px 0;
@@ -116,36 +92,26 @@
             background: linear-gradient(45deg, #ff6b35, #f7931e);
             width: 0%;
             transition: width 0.3s ease;
-            border-radius: 4px;
-        }
-
-        .progress-text {
-            text-align: center;
-            margin-top: 10px;
-            color: #ccc;
-            font-size: 0.8em;
         }
 
         .chat-area {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: #111;
+            background: linear-gradient(135deg, rgba(17, 17, 17, 0.9) 0%, rgba(26, 26, 46, 0.8) 100%);
         }
 
         .chat-header {
-            background: linear-gradient(90deg, #1a1a1a, #2d2d2d);
-            color: white;
+            background: linear-gradient(90deg, rgba(26, 26, 46, 0.9), rgba(45, 45, 45, 0.9));
             padding: 20px 30px;
             text-align: center;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
         }
 
         .chat-messages {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            background: #111;
         }
 
         .message {
@@ -162,7 +128,6 @@
             max-width: 70%;
             padding: 15px 20px;
             border-radius: 15px;
-            position: relative;
             line-height: 1.6;
         }
 
@@ -172,9 +137,30 @@
         }
 
         .message.assistant .message-content {
-            background: #222;
+            background: linear-gradient(135deg, rgba(34, 34, 34, 0.9) 0%, rgba(45, 45, 45, 0.8) 100%);
+            backdrop-filter: blur(10px);
             color: #fff;
-            border: 1px solid #333;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .message-content h1, .message-content h2, .message-content h3 {
+            color: #ff6b35;
+            margin: 15px 0 10px 0;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .message-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .message-content strong {
+            color: #ff6b35;
         }
 
         .message-avatar {
@@ -185,45 +171,37 @@
             align-items: center;
             justify-content: center;
             margin: 0 10px;
-            font-size: 1em;
         }
 
         .message.user .message-avatar {
             background: linear-gradient(45deg, #ff6b35, #f7931e);
-            color: white;
             order: 2;
         }
 
         .message.assistant .message-avatar {
             background: linear-gradient(45deg, #333, #555);
-            color: white;
         }
 
         .chat-input {
             padding: 20px;
-            background: #1a1a1a;
-            border-top: 1px solid #333;
+            background: linear-gradient(90deg, rgba(26, 26, 46, 0.9), rgba(45, 45, 45, 0.9));
+            border-top: 1px solid rgba(255, 107, 53, 0.3);
         }
 
         .input-group {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         .message-input {
             flex: 1;
             padding: 15px 20px;
-            border: 1px solid #444;
+            border: 1px solid rgba(255, 107, 53, 0.3);
             border-radius: 25px;
-            font-size: 1em;
-            outline: none;
-            background: #222;
+            background: rgba(34, 34, 34, 0.8);
             color: white;
-            transition: border-color 0.3s ease;
-        }
-
-        .message-input:focus {
-            border-color: #ff6b35;
+            outline: none;
         }
 
         .send-btn {
@@ -233,7 +211,6 @@
             padding: 15px 25px;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 1em;
             transition: transform 0.2s ease;
         }
 
@@ -241,28 +218,93 @@
             transform: translateY(-2px);
         }
 
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .images-panel {
-            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
-            border-left: 1px solid #333;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.9) 0%, rgba(45, 45, 45, 0.9) 100%);
+            border-left: 1px solid rgba(255, 107, 53, 0.3);
             padding: 20px;
             overflow-y: auto;
         }
 
-        .images-header {
-            text-align: center;
+        .file-section {
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #333;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .images-header h3 {
+        .file-header {
+            background: rgba(255, 107, 53, 0.1);
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .file-header:hover {
+            background: rgba(255, 107, 53, 0.2);
+        }
+
+        .file-name {
+            font-weight: 600;
             color: #ff6b35;
-            margin-bottom: 5px;
         }
 
-        .images-count {
-            color: #888;
-            font-size: 0.8em;
+        .file-toggle {
+            color: #ff6b35;
+            transition: transform 0.3s ease;
+        }
+
+        .file-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .file-images {
+            display: none;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .file-images.open {
+            display: block;
+        }
+
+        .file-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+        }
+
+        .file-image-item {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .file-image-item:hover {
+            transform: scale(1.05);
+            border-color: #ff6b35;
+        }
+
+        .file-image-item.selected {
+            border-color: #f7931e;
+            transform: scale(1.1);
+        }
+
+        .file-image-item img {
+            width: 100%;
+            height: 60px;
+            object-fit: cover;
         }
 
         .images-grid {
@@ -276,73 +318,64 @@
             border-radius: 8px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            transition: transform 0.3s ease;
         }
 
         .image-item:hover {
             transform: scale(1.05);
-            border-color: #ff6b35;
         }
 
-        .image-item.selected {
-            border-color: #f7931e;
-            transform: scale(1.1);
+        .image-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-item:hover .image-remove {
+            display: flex;
         }
 
         .image-item img {
             width: 100%;
             height: 100px;
             object-fit: cover;
-            display: block;
         }
 
-        .image-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            color: white;
-            padding: 5px;
-            font-size: 0.7em;
-            text-align: center;
-        }
-
-        .loading {
+        .loading-indicator {
             display: none;
-            text-align: center;
-            padding: 20px;
+            align-items: center;
+            gap: 10px;
             color: #ff6b35;
+            font-size: 14px;
         }
 
-        .loading i {
+        .loading-indicator.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-top: 2px solid #ff6b35;
+            border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        .status-message {
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-            text-align: center;
-            font-size: 0.8em;
-        }
-
-        .status-success {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-            border: 1px solid #2ecc71;
-        }
-
-        .status-error {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-            border: 1px solid #e74c3c;
         }
 
         .modal {
@@ -371,138 +404,100 @@
             right: 35px;
             color: #f1f1f1;
             font-size: 40px;
-            font-weight: bold;
             cursor: pointer;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #666;
-            padding: 40px 20px;
-        }
-
-        .empty-state i {
-            font-size: 3em;
-            margin-bottom: 15px;
-            color: #444;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo">
                 <h1>⚡ GridAI</h1>
-                <p>Electrical Grid Assistant</p>
+                <p>Smart Electrical Grid Assistant</p>
             </div>
-            
-            <div class="upload-section">
-                <h3 style="margin-bottom: 15px; color: #ff6b35;">📁 Upload Documents</h3>
-                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Click to upload files</p>
-                    <small style="color: #888;">PDF, DOCX, XLSX, CSV, TXT, JSON</small>
-                    <input type="file" id="fileInput" class="file-input" multiple 
-                           accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.json">
-                </div>
-                <div id="fileList" class="file-list"></div>
+
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drop files here or click to upload</p>
+                <small>PDF, DOCX, Excel, Images</small>
             </div>
-            
+            <input type="file" id="fileInput" style="display: none;" multiple accept=".pdf,.docx,.xlsx,.xls,.png,.jpg,.jpeg">
+
             <div class="progress-container" id="progressContainer">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <div class="progress-text" id="progressText">Processing...</div>
+                <div id="progressText">Processing...</div>
             </div>
-            
-            <div id="statusArea"></div>
         </div>
-        
-        <!-- Chat Area -->
+
         <div class="chat-area">
             <div class="chat-header">
-                <h2>Chat with Eric - Your Grid Engineering Expert</h2>
-                <p>Ask questions about electrical systems, standards, and best practices</p>
+                <h2>🔌 Electrical Grid Engineering Assistant</h2>
+                <p>Ask questions about electrical systems and analyze diagrams</p>
             </div>
-            
+
             <div class="chat-messages" id="chatMessages">
                 <div class="message assistant">
-                    <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
+                    <div class="message-avatar">🤖</div>
                     <div class="message-content">
-                        <strong>Eric:</strong> Hello! I'm Eric, your electrical grid engineering assistant. Upload your technical documents OR ask me questions about substation design, power systems, safety standards, or any electrical engineering topic. I can analyze diagrams, specifications, and provide expert guidance based on IEEE, NESC, and NERC standards.
+                        Hello! I'm GridAI, your electrical engineering assistant. Upload documents or ask me any electrical engineering questions!
                     </div>
                 </div>
             </div>
-            
-            <div class="loading" id="loading">
-                <i class="fas fa-spinner"></i> Processing your request...
-            </div>
-            
+
             <div class="chat-input">
+                <div class="loading-indicator" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <span>AI is thinking...</span>
+                </div>
                 <div class="input-group">
-                    <input type="text" id="messageInput" class="message-input" 
-                           placeholder="Ask about electrical systems, standards, or upload documents first..."
-                           onkeypress="handleKeyPress(event)">
-                    <button class="send-btn" onclick="sendMessage()">
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <button onclick="document.getElementById('imageInput').click()" style="background: #333; border: 1px solid #555; color: white; padding: 15px; border-radius: 25px; cursor: pointer;">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <input type="text" id="messageInput" class="message-input" placeholder="Ask about electrical systems..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
         </div>
-        
 
+        <div class="images-panel">
+            <div class="images-header">
+                <h3>📊 Uploaded Files</h3>
+                <div id="filesCount">0 files</div>
+            </div>
+            <div id="filesContainer"></div>
+            
+            <div class="images-header" style="margin-top: 20px;">
+                <h3>🖼️ Selected Images</h3>
+                <div id="selectedCount">0 selected</div>
+            </div>
+            <div class="images-grid" id="selectedImages"></div>
+        </div>
     </div>
-    
-    <!-- Image Modal -->
+
     <div id="imageModal" class="modal">
         <span class="close" onclick="closeModal()">&times;</span>
         <img class="modal-content" id="modalImage">
     </div>
 
     <script>
-        let currentSessionId = null;
-        let selectedFiles = [];
-        let contextImages = [];
-        let allExtractedImages = [];
+        let sessionId = 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        let selectedImage = null;
 
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            selectedFiles = Array.from(e.target.files);
-            displayFileList();
-            
-            if (selectedFiles.length > 0) {
-                currentSessionId = null;
-                uploadFiles();
-            }
-        });
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
 
-        function displayFileList() {
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
-            
-            selectedFiles.forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.innerHTML = `
-                    <i class="fas fa-file"></i> ${file.name}
-                    <small>(${(file.size / 1024).toFixed(1)} KB)</small>
-                `;
-                fileList.appendChild(fileItem);
-            });
-        }
+        async function handleFileUpload(event) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
 
-        async function uploadFiles() {
-            if (selectedFiles.length === 0) return;
+            document.getElementById('progressContainer').style.display = 'block';
 
             const formData = new FormData();
-            selectedFiles.forEach(file => {
-                formData.append('files', file);
-            });
-
-            showProgressBar(true);
-            updateProgress(10, 'Uploading files...');
+            files.forEach(file => formData.append('files', file));
 
             try {
                 const response = await fetch('/upload-progress', {
@@ -510,254 +505,280 @@
                     body: formData
                 });
 
-                if (!response.ok) {
-                    throw new Error('Upload failed');
-                }
-
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let result = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    
+
                     const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
-                    
+                    const lines = chunk.split('\\n');
+
                     for (const line of lines) {
                         if (line.startsWith('data: ')) {
                             try {
                                 const data = JSON.parse(line.slice(6));
-                                if (data.progress) {
-                                    updateProgress(data.progress, data.message);
-                                }
+                                updateProgress(data.progress, data.message);
+
                                 if (data.result) {
-                                    result = data.result;
+                                    const result = JSON.parse(data.result);
+                                    if (result.status === 'success') {
+                                        displayExtractedImages(result.extracted_images, result.processed_files);
+                                    }
                                 }
-                            } catch (e) {}
+                            } catch (e) {
+                                console.error('Error parsing progress:', e);
+                            }
                         }
                     }
                 }
-
-                const finalResult = JSON.parse(result);
-                
-                if (finalResult.status === 'success') {
-                    currentSessionId = finalResult.session_id;
-                    updateProgress(100, 'Processing complete!');
-                    
-                    document.getElementById('messageInput').placeholder = 'Ask questions about your documents or click images to add to context...';
-                    
-                    console.log('Final result:', finalResult);
-                    if (finalResult.extracted_images && finalResult.extracted_images.length > 0) {
-                        console.log('Found', finalResult.extracted_images.length, 'extracted images');
-                        allExtractedImages = finalResult.extracted_images;
-                    } else {
-                        console.log('No extracted images found in result');
-                    }
-                    
-                    document.getElementById('fileInput').value = '';
-                    selectedFiles = [];
-                    
-                    addMessage(finalResult.message, 'assistant');
-                    
-                    setTimeout(() => showProgressBar(false), 2000);
-                } else {
-                    throw new Error(finalResult.detail || 'Processing failed');
-                }
-                
             } catch (error) {
-                updateProgress(0, 'Error: ' + error.message);
-                setTimeout(() => showProgressBar(false), 3000);
+                console.error('Upload error:', error);
+            } finally {
+                document.getElementById('progressContainer').style.display = 'none';
+                // Reset file input to allow re-uploading
+                document.getElementById('fileInput').value = '';
+            }
+        }
+
+        function updateProgress(progress, message) {
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = message;
+        }
+
+        let uploadedFiles = [];
+        let selectedImages = [];
+
+        function displayExtractedImages(images, processedFiles = null) {
+            const filesContainer = document.getElementById('filesContainer');
+            const filesCount = document.getElementById('filesCount');
+
+            if (processedFiles) {
+                uploadedFiles = processedFiles;
+                filesContainer.innerHTML = '';
+                filesCount.textContent = `${uploadedFiles.length} files`;
+
+                uploadedFiles.forEach((file, fileIndex) => {
+                    const fileSection = document.createElement('div');
+                    fileSection.className = 'file-section';
+                    
+                    const hasImages = file.images && file.images.length > 0;
+                    const fileType = file.name.split('.').pop().toUpperCase();
+                    
+                    fileSection.innerHTML = `
+                        <div class="file-header" onclick="toggleFile(${fileIndex})">
+                            <span class="file-name">${file.name} (${fileType})</span>
+                            <span class="file-toggle" id="toggle-${fileIndex}">▼</span>
+                        </div>
+                        <div class="file-images" id="file-images-${fileIndex}">
+                            <div class="file-images-grid" id="file-grid-${fileIndex}">
+                                ${hasImages ? '' : '<p style="color: #888; padding: 10px;">Text content processed - no images</p>'}
+                            </div>
+                        </div>
+                    `;
+                    
+                    filesContainer.appendChild(fileSection);
+                    
+                    // Add images to file grid if they exist
+                    if (hasImages) {
+                        const fileGrid = document.getElementById(`file-grid-${fileIndex}`);
+                        file.images.forEach((img, imgIndex) => {
+                            const imageItem = document.createElement('div');
+                            imageItem.className = 'file-image-item';
+                            imageItem.innerHTML = `<img src="data:image/jpeg;base64,${img}" alt="Image ${imgIndex + 1}">`;
+                            
+                            imageItem.addEventListener('dblclick', () => {
+                                addToSelectedImages(img, `${file.name} - Image ${imgIndex + 1}`);
+                            });
+                            
+                            imageItem.addEventListener('click', () => {
+                                openModal(`data:image/jpeg;base64,${img}`);
+                            });
+                            
+                            fileGrid.appendChild(imageItem);
+                        });
+                    }
+                });
+            }
+        }
+
+        function toggleFile(fileIndex) {
+            const fileImages = document.getElementById(`file-images-${fileIndex}`);
+            const toggle = document.getElementById(`toggle-${fileIndex}`);
+            
+            if (fileImages.classList.contains('open')) {
+                fileImages.classList.remove('open');
+                toggle.classList.remove('open');
+            } else {
+                fileImages.classList.add('open');
+                toggle.classList.add('open');
+            }
+        }
+
+        function addToSelectedImages(imageData, title) {
+            const imageId = `selected_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
+            selectedImages.push({
+                id: imageId,
+                data: imageData,
+                title: title
+            });
+            
+            displaySelectedImages();
+        }
+
+        async function removeImage(imageId, index) {
+            try {
+                // Remove from backend
+                await fetch('/remove-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_id: imageId })
+                });
+
+                // Remove from frontend
+                storedImages.splice(index, 1);
+                displayStoredImages();
+            } catch (error) {
+                console.error('Error removing image:', error);
+            }
+        }
+
+        function displaySelectedImages() {
+            const selectedGrid = document.getElementById('selectedImages');
+            const selectedCount = document.getElementById('selectedCount');
+
+            selectedGrid.innerHTML = '';
+            selectedCount.textContent = `${selectedImages.length} selected`;
+
+            selectedImages.forEach((image, index) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item';
+                imageItem.innerHTML = `
+                    <img src="data:image/jpeg;base64,${image.data}" alt="${image.title}" title="${image.title}">
+                    <button class="image-remove" onclick="removeSelectedImage(${index})" title="Remove from selection">
+                        ×
+                    </button>
+                `;
+                imageItem.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('image-remove')) {
+                        openModal(`data:image/jpeg;base64,${image.data}`);
+                    }
+                });
+                selectedGrid.appendChild(imageItem);
+            });
+        }
+
+        function removeSelectedImage(index) {
+            selectedImages.splice(index, 1);
+            displaySelectedImages();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedImage = e.target.result.split(',')[1];
+                };
+                reader.readAsDataURL(file);
+            }
+            // Reset the input so the same file can be selected again
+            event.target.value = '';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
             }
         }
 
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
-            
-            if (!message) return;
+            const sendBtn = document.getElementById('sendBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
 
-            addMessage(message, 'user');
+            if (!message && !selectedImage) return;
+
+            // Show loading state
+            sendBtn.disabled = true;
+            loadingIndicator.classList.add('show');
+            
+            // Add user message
+            addMessageToChat('user', message, selectedImage);
             messageInput.value = '';
 
-            showLoading(true);
-
             try {
-                const requestBody = {
-                    message: message,
-                    session_id: currentSessionId || 'general'
-                };
-                
-                if (contextImages.length > 0) {
-                    requestBody.image = contextImages[0];
-                }
-                
                 const response = await fetch('/chat', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestBody)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: sessionId,
+                        image: selectedImage,
+                        context_images: selectedImages.map(img => img.data)
+                    })
                 });
 
-                const result = await response.json();
-                
-                if (response.ok) {
-                    addMessage(result.response, 'assistant', result.images || []);
-                    if (!currentSessionId) {
-                        currentSessionId = result.session_id;
-                    }
-                } else {
-                    addMessage('Sorry, I encountered an error: ' + result.detail, 'assistant');
-                }
+                const data = await response.json();
+                addMessageToChat('assistant', data.response);
+
             } catch (error) {
-                addMessage('Sorry, I encountered an error: ' + error.message, 'assistant');
+                console.error('Chat error:', error);
+                addMessageToChat('assistant', 'I encountered an error. Please try again.');
             } finally {
-                showLoading(false);
+                // Hide loading state
+                sendBtn.disabled = false;
+                loadingIndicator.classList.remove('show');
+                selectedImage = null;
             }
         }
 
-        function addMessage(content, role, images = []) {
+        function addMessageToChat(sender, message, image = null) {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            
-            const avatar = role === 'user' ? 
-                '<i class="fas fa-user"></i>' : 
-                '<i class="fas fa-robot"></i>';
-            
-            const name = role === 'user' ? 'You' : 'Eric';
-            
-            const formattedContent = formatMessage(content);
-            
-            let imagesHtml = '';
-            if (images && images.length > 0) {
-                imagesHtml = '<div style="margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">';
-                images.forEach((image, index) => {
-                    imagesHtml += `
-                        <div style="border: 1px solid #444; border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="openImageModal('data:image/jpeg;base64,${image}')">
-                            <img src="data:image/jpeg;base64,${image}" style="width: 100%; height: 150px; object-fit: cover;" alt="Image ${index + 1}">
-                            <div style="padding: 5px; background: #333; text-align: center; font-size: 0.8em;">Image ${index + 1}</div>
-                        </div>
-                    `;
-                });
-                imagesHtml += '</div>';
+            messageDiv.className = `message ${sender}`;
+
+            let imageHtml = '';
+            if (image) {
+                imageHtml = `<img src="data:image/jpeg;base64,${image}" style="max-width: 200px; border-radius: 8px; margin-top: 10px; cursor: pointer;" onclick="openModal('data:image/jpeg;base64,${image}')">`;
             }
-            
+
+            let processedMessage = message;
+            if (sender === 'assistant' && typeof marked !== 'undefined') {
+                processedMessage = marked.parse(message);
+            } else {
+                processedMessage = message.replace(/\\n/g, '<br>');
+            }
+
             messageDiv.innerHTML = `
-                <div class="message-avatar">${avatar}</div>
+                <div class="message-avatar">${sender === 'user' ? '👤' : '🤖'}</div>
                 <div class="message-content">
-                    <strong>${name}:</strong> ${formattedContent}
-                    ${imagesHtml}
+                    ${processedMessage}
+                    ${imageHtml}
                 </div>
             `;
-            
+
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-        
-        function formatMessage(content) {
-            return content
-                .replace(/### (.*?)\n/g, '<h4 style="color: #ff6b35; margin: 15px 0 10px 0; font-size: 1.1em;">$1</h4>')
-                .replace(/## (.*?)\n/g, '<h3 style="color: #ff6b35; margin: 20px 0 15px 0; font-size: 1.2em;">$1</h3>')
-                .replace(/# (.*?)\n/g, '<h2 style="color: #ff6b35; margin: 25px 0 20px 0; font-size: 1.3em;">$1</h2>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #f7931e;">$1</strong>')
-                .replace(/^- (.*?)$/gm, '<div style="margin: 5px 0; padding-left: 20px;">• $1</div>')
-                .replace(/^\d+\. (.*?)$/gm, '<div style="margin: 5px 0; padding-left: 20px;">$&</div>')
-                .replace(/\n\n/g, '<br><br>')
-                .replace(/\n/g, '<br>')
-                .replace(/IEEE (\d+[A-Z]*)/g, '<span style="background: #333; padding: 2px 6px; border-radius: 3px; font-family: monospace;">IEEE $1</span>')
-                .replace(/NERC|NESC/g, '<span style="background: #333; padding: 2px 6px; border-radius: 3px; font-family: monospace;">$&</span>');
+
+        function openModal(imageSrc) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('imageModal').style.display = 'block';
         }
 
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
-        }
-
-        function showStatus(message, type) {
-            const statusArea = document.getElementById('statusArea');
-            statusArea.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
-            
-            setTimeout(() => {
-                statusArea.innerHTML = '';
-            }, 5000);
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-
-        function openImageModal(src) {
-            const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImage');
-            modal.style.display = 'block';
-            modalImg.src = src;
-        }
-        
-        function displayExtractedImages(images) {
-            console.log('displayExtractedImages called with', images.length, 'images');
-            const grid = document.getElementById('imagesGrid');
-            const count = document.getElementById('imagesCount');
-            
-            grid.innerHTML = '';
-            count.textContent = `${images.length} images extracted`;
-            
-            images.forEach((imageBase64, index) => {
-                const imageItem = document.createElement('div');
-                imageItem.className = 'image-item';
-                imageItem.onclick = () => addImageToContext(imageBase64, index);
-                
-                imageItem.innerHTML = `
-                    <img src="data:image/jpeg;base64,${imageBase64}" alt="Image ${index + 1}">
-                    <div class="image-overlay">Image ${index + 1}</div>
-                `;
-                
-                grid.appendChild(imageItem);
-                console.log('Added image', index + 1, 'to grid');
-            });
-            
-            console.log('Images grid updated with', images.length, 'images');
-        }
-        
-        function showProgressBar(show) {
-            document.getElementById('progressContainer').style.display = show ? 'block' : 'none';
-        }
-        
-        function updateProgress(percent, message) {
-            document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('progressText').textContent = message;
-        }
-        
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
         }
-        
-        function addImageToContext(imageBase64, index) {
-            contextImages = [imageBase64];
-            
-            const messageInput = document.getElementById('messageInput');
-            messageInput.placeholder = `Image ${index + 1} added to context - Ask about this image...`;
-            
-            // Visual feedback
-            const imageItems = document.querySelectorAll('.image-item');
-            imageItems.forEach((item, i) => {
-                if (i === index) {
-                    item.classList.add('selected');
-                } else {
-                    item.classList.remove('selected');
-                }
-            });
-            
-            showStatus(`Image ${index + 1} added to context`, 'success');
-        }
-        
+
         window.onclick = function(event) {
             const modal = document.getElementById('imageModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            if (event.target === modal) {
+                closeModal();
             }
         }
     </script>
